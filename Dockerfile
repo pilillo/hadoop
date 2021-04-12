@@ -5,9 +5,15 @@ FROM ${BASE_CONTAINER} as base
 ARG HADOOP_VERSION=3.2.2
 ARG HADOOP_DOWNLOAD_URL=https://archive.apache.org/dist/hadoop/common/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz
 
+ARG INSTALLATION_DIR="/opt"
+
 ARG HADOOP_USER=hadoop
 ARG HADOOP_UID=185
-ARG INSTALLATION_DIR="/opt"
+ARG HADOOP_GROUP=hadoop
+
+ENV HADOOP_USER=$HADOOP_USER
+ENV HADOOP_UID=$HADOOP_UID
+ENV HADOOP_GROUP=HADOOP_GROUP
 
 ENV HADOOP_HOME="${INSTALLATION_DIR}/hadoop"
 ENV HADOOP_CONF_DIR=${HADOOP_HOME}/etc/hadoop
@@ -17,9 +23,12 @@ RUN apt-get update \
     && apt-get install -y curl --no-install-recommends \
 	&& rm -rf /var/lib/apt/lists/* \
     && useradd -u ${HADOOP_UID} ${HADOOP_USER} \
-    && chgrp root /etc/passwd && chmod ug+rw /etc/passwd
+    && groupadd ${HADOOP_GROUP} \
+    && usermod -a -G ${HADOOP_GROUP} ${HADOOP_USER}
+    #&& chgrp root /etc/passwd && chmod ug+rw /etc/passwd
 
 RUN curl $HADOOP_DOWNLOAD_URL | tar xvz -C ${INSTALLATION_DIR} \
+    && rm *.tar.gz \
 	&& ln -s ${INSTALLATION_DIR}/hadoop-${HADOOP_VERSION} ${HADOOP_HOME} \
 	&& rm -r ${HADOOP_HOME}/share/doc
 
