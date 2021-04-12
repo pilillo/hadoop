@@ -24,19 +24,21 @@ RUN apt-get update \
 	&& rm -rf /var/lib/apt/lists/* \
     && useradd -u ${HADOOP_UID} ${HADOOP_USER} \
     && groupadd ${HADOOP_GROUP} \
-    && usermod -a -G ${HADOOP_GROUP} ${HADOOP_USER}
-    #&& chgrp root /etc/passwd && chmod ug+rw /etc/passwd
+    && usermod -a -G ${HADOOP_GROUP} ${HADOOP_USER} \
+    && chgrp root /etc/passwd && chmod ug+rw /etc/passwd
 
 RUN curl $HADOOP_DOWNLOAD_URL | tar xvz -C ${INSTALLATION_DIR} \
-    && rm *.tar.gz \
 	&& ln -s ${INSTALLATION_DIR}/hadoop-${HADOOP_VERSION} ${HADOOP_HOME} \
 	&& rm -r ${HADOOP_HOME}/share/doc
 
 # in the share/hadoop/tools/lib there are clients to various data lakes (gcp, azure, alibaba, etc.)
-# add a link to the common lib in order to add them to the classpath
-RUN ln -s ${HADOOP_HOME}/share/hadoop/tools/lib/* ${HADOOP_HOME}/share/hadoop/common/lib/
+# add a link to the common lib in order to add them to the classpath (skip those existing)
+#RUN ln -s ${HADOOP_HOME}/share/hadoop/tools/lib/* ${HADOOP_HOME}/share/hadoop/common/lib/
+RUN ln -s ${HADOOP_HOME}/share/hadoop/tools/lib/* ${HADOOP_HOME}/share/hadoop/common/lib/ || :
 
+RUN chown -R ${HADOOP_USER}:${HADOOP_GROUP} ${HADOOP_HOME}
 WORKDIR ${HADOOP_HOME}
+
 RUN chmod g+w ${HADOOP_HOME}
 RUN chmod a+x ${HADOOP_HOME}/bin \
     && chmod a+x ${HADOOP_HOME}/sbin
