@@ -1,1 +1,3 @@
-# hadoop
+# Hadoop
+
+Base hadoop image
