@@ -23,6 +23,10 @@ RUN curl $HADOOP_DOWNLOAD_URL | tar xvz -C ${INSTALLATION_DIR} \
 	&& ln -s ${INSTALLATION_DIR}/hadoop-${HADOOP_VERSION} ${HADOOP_HOME} \
 	&& rm -r ${HADOOP_HOME}/share/doc
 
+# in the share/hadoop/tools/lib there are clients to various data lakes (gcp, azure, alibaba, etc.)
+# add a link to the common lib in order to add them to the classpath
+RUN ln -s ${HADOOP_HOME}/share/hadoop/tools/lib/hadoop-* ${HADOOP_HOME}/share/hadoop/common/lib/
+
 WORKDIR ${HADOOP_HOME}
 RUN chmod g+w ${HADOOP_HOME}
 RUN chmod a+x ${HADOOP_HOME}/bin \
